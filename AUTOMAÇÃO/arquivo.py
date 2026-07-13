@@ -20,7 +20,14 @@ class Arquivo:
                 print(tela) 
         except FileNotFoundError:
             print(f'arquivo não encontrado {self.nome_do_arquivo} ')
-    
+        except UnicodeDecodeError:
+            print('erro de codec!! ') 
+            try:
+                with open(self.nome_do_arquivo, 'r', encoding='latin-1') as leitura:
+                    tela = leitura.read()
+                    print(tela) 
+            except Exception:
+                print(f'não foi possível ler o arquivo')
     def adicionar_arquivo(self):
         if path(self.nome_do_arquivo).exists():
             with open(self.nome_do_arquivo, 'a', encoding='utf-8') as adiciona:
@@ -31,7 +38,7 @@ class Arquivo:
     # preciso colocar uma pergunta sobre qual arquivo o usuario deseja apagar
     def deletar_arquivo(self):
         if path(self.nome_do_arquivo).exists():
-           path(self.nome_do_arquivo).unlink() # aprendi hoje, 01/07/2026
+           path(self.nome_do_arquivo).unlink() # apaga arquivos: 01/07/2026
            print('arquivo removido')
         else:
             print('arquivo nao existe!!')
@@ -62,11 +69,11 @@ class ArquivoJSON(Arquivo):
     
     def adicionar_dados(self):
         while True:
-            print('para sair aperte enter')
             chave = input('digite a chave: ')
             if chave.lower() == '':
                 break
             valor = input('digite o valor')
+            print('ou enter para sair')
             self.dicionario[chave] = valor
 
 class VarreduraJSON:
@@ -84,46 +91,47 @@ class VarreduraJSON:
                 print('=============================================')
 # CRIANDO O MENU DE OPÇÕES
 while True:
-    print("---MENU DE OPÇÕES---")
-    print('OPÇÃO  1 CRIAR ARQUIVO TXT')
-    print('OPÇÃO  2 CRIAR ARQUIVO JSON')
-    print('VARRER 3 ARQUIVOS')
-    Usuario = input("Dentre as opções, qual você deseja? / ou Enter para sair ")
+    print("\n---MENU DE OPÇÕES---")
+    print('OPÇÃO 1 CRIAR ARQUIVO TXT')
+    print('OPÇÃO 2 CRIAR ARQUIVO JSON')
+    print('OPÇÃO 3 VARRER  ARQUIVOS')
+    print('OPÇÃO 4 LER ARQUIVOS')
+    Usuario = input("\nDentre as opções, qual você deseja? / ou Enter para sair ")
     if Usuario == '':
         print('sessão finalizada')
         break
+    nome_do_arquivo = input('qual vai ser o nome do arquivo? ou enter para sair ')
+    if nome_do_arquivo == '':
+        continue
     if Usuario == '1':
-       nome_do_arquivo = input('qual vai ser o nome do arquivo? ')
-       conteudo = input('agora me fala o conteudo? ')
-       
-       caminho = path(PASTA)
-       
-       arquivo = Arquivo(caminho/nome_do_arquivo, conteudo)
-       arquivo.cria_arquivo()
-       print('arquivo txt criado com sucesso')
+        
+        conteudo = input('agora me fala o conteudo? ')
+        caminho = path(PASTA)
+        arquivo = Arquivo(caminho/nome_do_arquivo, conteudo)
+        arquivo.cria_arquivo()
+        print('arquivo txt criado com sucesso')
     
     elif Usuario == '2':
-        jsonn0 = ArquivoJSON(PASTA)
+        
+        caminho = path(PASTA)
+        jsonn0 = ArquivoJSON(caminho/nome_do_arquivo)
+        jsonn0.adicionar_dados()
         jsonn0.criar_arquivoJson()
         print('arquivo json criado com sucesso')
+    
     elif Usuario == '3':
-        varrer = VarreduraJSON(PASTA)
-        varrer.varrerJson()
+        
+        varrer = ArquivoJSON(path(PASTA)/nome_do_arquivo)
+        varrer.exir_arquivoJson()
         print('arquivos varridos com sucesso')
+    
+    elif Usuario == '4':
+        
+        caminho = path(PASTA)
+        arquivo = Arquivo(caminho/nome_do_arquivo)
+        arquivo.ler_arquivo()
+           
     else:
         print('Opção invalida!!')
-# jsonn0 = ArquivoJSON('/home/brunodev/arquivos_Json/nome0.json')
-# jsonn1 = ArquivoJSON('/home/brunodev/arquivos_Json/nome1.json')
-# jsonn2 = ArquivoJSON('/home/brunodev/arquivos_Json/nome2.json')
+        
 
-# jsonn0.adicionar_dados()
-# jsonn0.criar_arquivoJson()
-
-# jsonn1.adicionar_dados()
-# jsonn1.criar_arquivoJson()
-
-# jsonn2.adicionar_dados()
-# jsonn2.criar_arquivoJson()
-
-# varrer = VarreduraJSON('/home/brunodev/arquivos_Json') 
-# varrer.varrerJson()
