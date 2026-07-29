@@ -1,6 +1,7 @@
 from pathlib import Path as path
 import openpyxl
 import json
+import pdfplumber as pdf
 PASTA = "/home/brunodev/arquivos_Json/"
 PASTA1 = "/home/brunodev/"
 class Arquivo:
@@ -22,7 +23,7 @@ class Arquivo:
         except FileNotFoundError:
             print(f'arquivo não encontrado {self.nome_do_arquivo} ')
         except UnicodeDecodeError:
-            print('erro de codec!! ') 
+            print('erro de encoding ') 
             try:
                 with open(self.nome_do_arquivo, 'r', encoding='latin-1') as leitura:
                     tela = leitura.read()
@@ -36,7 +37,6 @@ class Arquivo:
                 print('arquivo adicionado com sucesso')  
         else:
             print('arquivo nao existe!!')
-    # preciso colocar uma pergunta sobre qual arquivo o usuario deseja apagar
     def deletar_arquivo(self):
         if path(self.nome_do_arquivo).exists():
            path(self.nome_do_arquivo).unlink() # apaga arquivos: 01/07/2026
@@ -53,7 +53,7 @@ class ArquivoJSON(Arquivo):
            print('o arquivo ja existe!!')    
         else:                                    
              # parents=True → cria o que faltar | exist_ok=True → não reclama se já existir
-            path(PASTA).mkdir(parents=True, exist_ok=True) # esse pequeno codigo de verificação nao foi eu que fiz, mas serve como aprendizado
+            path(PASTA).mkdir(parents=True, exist_ok=True) # esse pequeno codigo de verificação, nao foi eu que fiz, mas serve como aprendizado
             with open(self.nome_do_arquivo, 'w', encoding='utf-8') as arquivo:
                 json.dump(self.dicionario, arquivo) # reforçando meu conhecimento 
                 print('arquivo criado com sucesso') 
@@ -85,9 +85,9 @@ class VarreduraJSON:
                 print(arquivo)
                 with open(arquivo, 'r', encoding='utf-8') as arquivo:
                     leitura = json.load(arquivo)
-                    print('=============================================')
+                    print('-'*40)
                     print(json.dumps(leitura,  indent=2, ensure_ascii=False))
-                    print('=============================================')
+                    print('-'*40)
                 encontrou = True
             if not encontrou:        
                 print('arquivo não existe')
@@ -102,27 +102,24 @@ class ArquivoExcel(Arquivo):
             workbook = openpyxl.load_workbook(self.nome_do_arquivo)
             planilha = workbook.active  # pega a aba ativa (a que está selecionada)
             for linha in planilha.iter_rows(values_only=True):
-                print(linha)  # cada "linha" já vem como uma tupla com os valores das células     
+                print(linha)      
                 self.dados.append(linha)
         except FileNotFoundError:
-            print(f'arquivo não encontrado {self.nome_do_arquivo} ')    
+            print(f'arquivo não encontrado {self.nome_do_arquivo} ')  
 # CRIANDO O MENU DE OPÇÕES
 def opção_1(nome_do_arquivo):
     conteudo = input('agora me fala o conteudo? ')
     caminho = path(PASTA)
     arquivo = Arquivo(caminho/nome_do_arquivo, conteudo)
     arquivo.cria_arquivo()
-    print('arquivo txt criado com sucesso')
 def opção_2(nome_do_arquivo):
     caminho = path(PASTA)
     jsonn0 = ArquivoJSON(caminho/nome_do_arquivo)
     jsonn0.adicionar_dados()
     jsonn0.criar_arquivoJson()
-    print('arquivo json criado com sucesso')
 def opção_3(nome_do_arquivo):
-    varrer = ArquivoJSON(path(PASTA)/nome_do_arquivo)
-    varrer.exibir_arquivoJson()
-    print('arquivos varridos com sucesso')
+    exibir = ArquivoJSON(path(PASTA)/nome_do_arquivo)
+    exibir.exibir_arquivoJson()
 def opção_4(nome_do_arquivo):
     caminho = path(PASTA)
     arquivo = Arquivo(caminho/nome_do_arquivo)
@@ -152,7 +149,7 @@ while True:
     print("\n---MENU DE OPÇÕES---")
     print('OPÇÃO 1 CRIAR ARQUIVO TXT')
     print('OPÇÃO 2 CRIAR ARQUIVO JSON')
-    print('OPÇÃO 3 VARRER  ARQUIVOS')
+    print('OPÇÃO 3 EXIBIR ARQUIVO jSON')
     print('OPÇÃO 4 LER ARQUIVOS')
     print('OPÇÃO 5 DELETAR UM ARQUIVO')
     print('OPÇÃO 6 VARRER ARQUIVOS JSON')
