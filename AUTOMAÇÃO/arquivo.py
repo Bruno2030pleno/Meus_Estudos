@@ -1,7 +1,11 @@
+
 from pathlib import Path as path
 import openpyxl
 import json
 import pdfplumber as pdf
+import sqlite3 as sql
+from contextlib import closing
+from datetime import datetime
 PASTA = "/home/brunodev/arquivos_Json/"
 PASTA1 = "/home/brunodev/"
 class Arquivo:
@@ -39,23 +43,21 @@ class Arquivo:
             print('arquivo nao existe!!')
     def deletar_arquivo(self):
         if path(self.nome_do_arquivo).exists():
-           path(self.nome_do_arquivo).unlink() # apaga arquivos: 01/07/2026
+           path(self.nome_do_arquivo).unlink()
            print('arquivo removido')
         else:
             print('arquivo nao existe!!')
-# nessa parte do codigo estou reforçando o meu conhecimento em escrever arquivos Json
 class ArquivoJSON(Arquivo):
-    def __init__(self, nome_do_arquivo, conteudo_do_arquivo=''): # tambem estou reforçando
+    def __init__(self, nome_do_arquivo, conteudo_do_arquivo=''):
         super().__init__(nome_do_arquivo, conteudo_do_arquivo)
         self.dicionario = {}
     def criar_arquivoJson(self):
         if path(self.nome_do_arquivo).exists():
            print('o arquivo ja existe!!')    
         else:                                    
-             # parents=True → cria o que faltar | exist_ok=True → não reclama se já existir
-            path(PASTA).mkdir(parents=True, exist_ok=True) # esse pequeno codigo de verificação, nao foi eu que fiz, mas serve como aprendizado
+            path(PASTA).mkdir(parents=True, exist_ok=True)
             with open(self.nome_do_arquivo, 'w', encoding='utf-8') as arquivo:
-                json.dump(self.dicionario, arquivo) # reforçando meu conhecimento 
+                json.dump(self.dicionario, arquivo)
                 print('arquivo criado com sucesso') 
     def exibir_arquivoJson(self):
         try: 
@@ -100,12 +102,45 @@ class ArquivoExcel(Arquivo):
     def ler_arquivos_excel(self):
         try:    
             workbook = openpyxl.load_workbook(self.nome_do_arquivo)
-            planilha = workbook.active  # pega a aba ativa (a que está selecionada)
+            planilha = workbook.active
             for linha in planilha.iter_rows(values_only=True):
                 print(linha)      
                 self.dados.append(linha)
         except FileNotFoundError:
-            print(f'arquivo não encontrado {self.nome_do_arquivo} ')  
+            print(f'arquivo não encontrado {self.nome_do_arquivo} ')
+class BancoDeDadosSqlite:
+    def __init__(self):
+        self.dados = []
+    def criando_banco_de_dados(self, nome_do_banco):
+        with sql.connect(nome_do_banco) as conexão:
+            with closing(conexão.cursor()) as cursor:
+                cursor.execute("""
+                    create table arquivos(
+                        id integer primary key autoincrement,
+                        acao text,
+                        nome_arquivo text,
+                        tipo_arquivo text,
+                        data_hora text,
+                        nome_do_banco text
+                    )
+                """)
+    def salvar_dados(self, acao, nome_arquivo, tipo_arquivo, nome_do_banco):
+        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with sql.connect(nome_do_banco) as conexão:
+            with closing(conexão.cursor()) as cursor:
+                cursor.execute(
+                    "insert into arquivos(acao, nome_arquivo, tipo_arquivo, data_hora) values (?, ?, ?, ?)",
+                    (acao, nome_arquivo, tipo_arquivo, data_hora)
+                )
+                conexão.commit()
+    def exibir_dados_do_banco(self, nome_do_banco):
+        with sql.connect(nome_do_banco) as conexão:
+            conexão.row_factory = sql.Row
+            with closing(conexão.cursor()) as cursor:
+                resultado = cursor.execute("select * from arquivos")
+                for dados in resultado.fetchall():
+                    self.dados.append(dados)
+                    print(f"ID {dados['id']} ação {dados['acao']} nome do arquivo {dados['nome_arquivo']}")
 # CRIANDO O MENU DE OPÇÕES
 def opção_1(nome_do_arquivo):
     conteudo = input('agora me fala o conteudo? ')
@@ -129,13 +164,14 @@ def opção_5(nome_do_arquivo):
     arquivo = Arquivo(caminho/nome_do_arquivo)
     arquivo.deletar_arquivo()  
 def opção_6(nome_do_arquivo):
-    caminho = path(PASTA1 )
+    caminho = path(PASTA1)
     arquivo = VarreduraJSON(caminho/nome_do_arquivo)
     arquivo.varrerJson()
 def opção_7(nome_do_arquivo):
     caminho = path(PASTA)
     arquivo_excel = ArquivoExcel(caminho/nome_do_arquivo)
     arquivo_excel.ler_arquivos_excel()    
+
 opcao = {
     '1':opção_1,
     '2':opção_2,
@@ -166,4 +202,3 @@ while True:
     else:
         print('Opção invalida!!!')
         continue
-    
