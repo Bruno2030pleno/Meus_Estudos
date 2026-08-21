@@ -39,7 +39,7 @@ class Arquivo:
             print('arquivo nao existe!!')
     def deletar_arquivo(self):
         if path(self.nome_do_arquivo).exists():
-           path(self.nome_do_arquivo).unlink()
+           path(self.nome_do_arquivo).unlink() # remove O ARQUIVO
            print('arquivo removido')
         else:
             print('arquivo nao existe!!')
@@ -103,22 +103,26 @@ class ArquivoExcel(Arquivo):
                 self.dados.append(linha) 
         except FileNotFoundError:
             print(f'arquivo não encontrado {self.nome_do_arquivo} ')
+
 class ArquivoCsv(Arquivo):
     def __init__(self, nome_do_arquivo, conteudo_do_arquivo=''):
        super().__init__(nome_do_arquivo, conteudo_do_arquivo)
-       
+       self.lista = []
     def ler_arquivo_csv(self):
         try:
             with open(self.nome_do_arquivo,'r', encoding='latin-1')  as arquivocsv:
                         leitura = csv.reader(arquivocsv)
                         for dados in leitura:
-                            print(dados)                    
+                            self.lista.append(dados)
+                        return self.lista    
+                                                
         except UnicodeError:
             print('Erro de unicode!!')
             try:
                 with open(self.nome_do_arquivo,'r', encoding='utf-8')  as arquivocsv:
                     leitura = csv.reader(arquivocsv)
                     for dados in leitura:
-                        print(dados)
+                        self.lista.append(dados)
+                    return self.lista    
             except FileNotFoundError:
                 print('erro arquivo nao encontrado')             

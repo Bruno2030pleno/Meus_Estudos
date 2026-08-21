@@ -28,12 +28,20 @@ class BancoDeDadosSqlite:
                     (acao, nome_arquivo, tipo_arquivo, data_hora)
                 )
                 conexão.commit()
+
     def exibir_dados_do_banco(self):
+            with sql.connect(BANCO) as conexão:
+                conexão.row_factory = sql.Row
+                with closing(conexão.cursor()) as cursor:
+                    resultado = cursor.execute("select * from arquivos")
+                    for dados in resultado.fetchall():
+                        self.dados.append(dados)
+                        print("-"*50)
+                        print(f"ID {dados['id']} -- ação {dados['acao']} -- nome do arquivo {dados['nome_arquivo']}")
+               
+
+    def dados_de_arquivos_csv(self, nome_do_produto, preco_do_produto, validade_do_produto):
         with sql.connect(BANCO) as conexão:
-            conexão.row_factory = sql.Row
             with closing(conexão.cursor()) as cursor:
-                resultado = cursor.execute("select * from arquivos")
-                for dados in resultado.fetchall():
-                    self.dados.append(dados)
-                    print("-"*50)
-                    print(f"ID {dados['id']} -- ação {dados['acao']} -- nome do arquivo {dados['nome_arquivo']}")
+                cursor.execute("create table if not exists arquivoCSV(id integer primary key autoincrement, nome_do_produto text not null , preco_do_produto real,validade_do_produto date)") 
+                cursor.execute("insert into arquivoCSV(nome_do_produto, preco_do_produto, validade_do_produto)values(?, ?, ?)", (nome_do_produto, preco_do_produto, validade_do_produto))             

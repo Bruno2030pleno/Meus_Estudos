@@ -49,7 +49,12 @@ def iniciar_menu():
     def opção_8(nome_do_arquivo):
         caminho = path(PASTA)
         csv = ArquivoCsv(caminho/nome_do_arquivo)
-        csv.ler_arquivo_csv()
+        dados = csv.ler_arquivo_csv()
+        for tabela in dados:
+            NOME_1 = tabela[0]
+            NOME_2 = tabela[1]
+            banco = BancoDeDadosSqlite()
+            banco.dados_de_arquivos_csv(NOME_1, NOME_2, None)
 
     opcao = {
         '1':opção_1,
