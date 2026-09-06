@@ -19,9 +19,9 @@ class BancoDeDadosSqlite:
                         nome_do_banco text
                     )
                 """)
-    def salvar_dados(self, acao, nome_arquivo, tipo_arquivo, nome_do_banco):
+    def salvar_dados(self, acao, nome_arquivo, tipo_arquivo):
         data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with sql.connect(nome_do_banco) as conexão:
+        with sql.connect(BANCO) as conexão:
             with closing(conexão.cursor()) as cursor:
                 cursor.execute(
                     "insert into arquivos(acao, nome_arquivo, tipo_arquivo, data_hora) values (?, ?, ?, ?)",
@@ -43,5 +43,7 @@ class BancoDeDadosSqlite:
     def dados_de_arquivos_csv(self, nome_do_produto, preco_do_produto, validade_do_produto):
         with sql.connect(BANCO) as conexão:
             with closing(conexão.cursor()) as cursor:
-                cursor.execute("create table if not exists arquivoCSV(id integer primary key autoincrement, nome_do_produto text not null , preco_do_produto real,validade_do_produto date)") 
-                cursor.execute("insert into arquivoCSV(nome_do_produto, preco_do_produto, validade_do_produto)values(?, ?, ?)", (nome_do_produto, preco_do_produto, validade_do_produto))             
+                cursor.execute("create table if not exists arquivoCSV(id integer primary key autoincrement,\
+                    nome_do_produto text not null , preco_do_produto real,validade_do_produto date)") 
+                cursor.execute("insert into arquivoCSV(nome_do_produto, preco_do_produto,\
+                validade_do_produto)values(?, ?, ?)", (nome_do_produto, preco_do_produto, validade_do_produto))             
